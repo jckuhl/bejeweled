@@ -47,6 +47,14 @@
     background-color: blue;
 }
 
+.yellow {
+    background-color: yellow;
+}
+
+.purple {
+    background-color: purple;
+}
+
 .selected {
     border: 2px solid black;
 }
