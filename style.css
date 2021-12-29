@@ -40,9 +40,13 @@
 }
 
 .green {
-    background-color: red;
+    background-color: green;
 }
 
 .blue {
-    background-color: red;
+    background-color: blue;
+}
+
+.selected {
+    border: 2px solid black;
 }
