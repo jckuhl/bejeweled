@@ -1,0 +1,48 @@
+#game {
+    display: flex;
+    width: 500px;
+    flex-direction: column;
+}
+
+.meter {
+    width: 100%;
+    border: 2px solid black;
+}
+
+.progress {
+    height: 1em;
+    background-color: red;
+    display: inline-block;
+}
+
+.grid {
+    display: grid;
+    margin: 0 0;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+}
+
+.square {
+    margin: -1px -1px;
+    border: 2px solid black;
+    width: 50px;
+    height: 50px;
+}
+
+.circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.red {
+    background-color: red;
+}
+
+.green {
+    background-color: red;
+}
+
+.blue {
+    background-color: red;
+}
