@@ -69,6 +69,26 @@ function select(event, circle) {
     }
 
     function isNeighbor(circleA, circleB) {
+        const adjacentSquareFuncs = {
+            LEFT: (circle) => circle.position - 1,
+            RIGHT: (circle) => circle.position + 1,
+            UP: (circle) => circle.position - 10,
+            DOWN: (circle) => circle.position + 10
+        }
+        let adjacentSquaresEntries = Object.entries(adjacentSquareFuncs)
+        if(circleA.position % 10 === 0)
+            adjacentSquaresEntries = adjacentSquaresEntries.filter(([k, v])=> k !== 'LEFT');
+        if((circleA.position + 1) % 10 == 0)
+            adjacentSquaresEntries = adjacentSquaresEntries.filter(([k, v])=> k !== 'RIGHT');
+        if(circleA.position >= 0 && circleA.position <= 9)
+            adjacentSquaresEntries = adjacentSquaresEntries.filter(([k, v])=> k !== 'UP');
+        if(circleA.position >= 90 && circleA.position <= 99)
+            adjacentSquaresEntries = adjacentSquaresEntries.filter(([k, v])=> k !== 'DOWN');
+        console.log(adjacentSquaresEntries);
+        for(let [direction, func] of adjacentSquaresEntries) {
+            if(func(circleA) === circleB.position)
+                return true;
+        }
         return false;
     }
 
@@ -86,7 +106,12 @@ function select(event, circle) {
         //if selected is neighbor
         } else {
             swap(circle, selected);
-            console.log('do cascade');
+            if(match) {
+                console.log('do cascade');
+            } else {
+                console.log('swap back');
+            }
+
         }
     }
 }
