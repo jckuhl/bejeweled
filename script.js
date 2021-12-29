@@ -21,9 +21,8 @@ class Circle {
 
 const Type = {
     NORMAL: 1,
-    SUPERCUBE: 2, //Matching 5
-    HYPERCUBE: 3, //Matching 5 up AND 5 across
-    SUPERHYPERCUBE: 4
+    SUPERCUBE: 2, //Matching 4
+    HYPERCUBE: 3, //Matching 5
 }
 
 function cascade() {
@@ -44,7 +43,8 @@ function populate() {
         div.appendChild(circle);
         playField.appendChild(div);
     }
-    cascade();
+    const initPoints = cascade();
+    score(initPoints);
 }
 
 
@@ -57,7 +57,7 @@ function select(event, circle) {
         });
     }
 
-    function ifNothingIsSelected() {
+    function nothingIsSelected() {
         return circles.every(c => !c.div.classList.contains('selected'))
     }
 
@@ -74,7 +74,7 @@ function select(event, circle) {
     }
 
     function isNeighbor(circleA, circleB) {
-        
+
         const adjacentSquareFuncs = {
             LEFT: (circle) => circle.position - 1,
             RIGHT: (circle) => circle.position + 1,
@@ -105,7 +105,7 @@ function select(event, circle) {
     }
 
     //if nothing is selected
-    if(ifNothingIsSelected()) {
+    if(nothingIsSelected()) {
         circle.div.classList.add('selected');
     } else {
         const selected = circles.find(c => c.div.classList.contains('selected'));
@@ -114,7 +114,6 @@ function select(event, circle) {
         if(!isNeighbor(circle, selected)) {
             deselect();
             circle.div.classList.add('selected');
-            console.log('select ' + circle.position);
         //if selected is neighbor
         } else {
             swap(circle, selected);
@@ -149,7 +148,7 @@ function score(points) {
 let totalScore = 0;
 let currentScore = 0;
 let currentLevel = 1;
-let levelScore = calculateLevelScore();
+let levelScore = calculateLevelScore(currentLevel);
 
 function calculateLevelScore(level) {
     return 100 * level;
