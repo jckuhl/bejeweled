@@ -6,152 +6,87 @@ const colors = ['red', 'green', 'blue', 'purple', 'yellow'];
 
 const circles = [];
 
+class Circle {
+    #div;
+
+    constructor(div) {
+        this.#div = div;
+    }
+
+    deselect() {
+        this.#div.classList.remove('selected');
+    }
+
+    select() {
+        this.#div.classList.add('selected');
+    }
+
+    get position() {
+        return {
+            top: parseFloat(this.#div.style.top),
+            left: parseFloat(this.#div.style.left)
+        }
+    }
+
+    get selected() {
+        return this.#div.classList.contains('selected');
+    }
+}
+
 function random(x) {
     return Math.floor(Math.random() * x);
 }
 
-class Circle {
-    constructor(position, div, color, type) {
-        this.position = position;
-        this.color = color;
-        this.div = div;
-        this.type = type ?? Type.NORMAL;
-    }
-}
-
-const Type = {
-    NORMAL: 1,
-    SUPERCUBE: 2, //Matching 4
-    HYPERCUBE: 3, //Matching 5
-}
-
-function cascade() {
-    return 10;
-}
-
-function populate() {
+function populateCircles() {
+    const rect = playField.getBoundingClientRect();
+    let top = rect.top + 2;
+    let left = rect.left + 2;
     for(let i = 0; i < 100; i++) {
-        const div = document.createElement('div');
-        div.classList.add('square');
-        const index = random(colors.length);
         const circle = document.createElement('div');
         circle.classList.add('circle');
-        circle.classList.add(colors[index]);
-        const c = new Circle(i, circle, colors[index]);
-        circle.addEventListener('click', (event) => select(event, c));
-        circles.push(c);
-        div.appendChild(circle);
-        playField.appendChild(div);
+        circle.classList.add(colors[random(colors.length)]);
+        circle.style.top = `${top}px`;
+        circle.style.left = `${left}px`;
+        const circleObj = new Circle(circle)
+        circle.addEventListener('click', (event) => select(circleObj));
+        circles.push(circleObj);
+        playField.appendChild(circle);
+        left += 52;
+        if((i + 1) % 10 === 0) {
+            top += 52;
+            left = rect.left;
+        }
     }
-    const initPoints = cascade();
-    score(initPoints);
 }
 
-
-
-function select(event, circle) {
-
+function select(circle) {
     function deselect() {
-        circles.forEach(c => {
-            c.div.classList.remove('selected');
-        });
+        circles.forEach(circle => circle.deselect());
     }
 
     function nothingIsSelected() {
-        return circles.every(c => !c.div.classList.contains('selected'))
+        return circles.every(circle => !circle.selected);
     }
 
-    function swap(circleA, circleB) {
-        const temp = Object.assign({},circleA);
-        circleA.position = circleB.position;
-        circleA.div.classList.remove(circleA.color);
-        circleA.color = circleB.color;
-        circleA.div.classList.add(circleB.color);
-        circleB.position = temp.position;
-        circleB.div.classList.remove(circleB.color);
-        circleB.color = temp.color;
-        circleB.div.classList.add(temp.color);
+    function isNeighbor(circle, selectedCircle) {
+        const topDiff = Math.abs(circle.position.top - selectedCircle.position.top);
+        const leftDiff = Math.abs(circle.position.left - selectedCircle.position.left);
+        return topDiff === 52 || leftDiff === 52;
     }
 
-    function isNeighbor(circleA, circleB) {
-
-        const adjacentSquareFuncs = {
-            LEFT: (circle) => circle.position - 1,
-            RIGHT: (circle) => circle.position + 1,
-            UP: (circle) => circle.position - 10,
-            DOWN: (circle) => circle.position + 10
-        }
-
-        let adjacentSquaresEntries = Object.entries(adjacentSquareFuncs)
-
-        if(circleA.position % 10 === 0)
-            adjacentSquaresEntries = adjacentSquaresEntries.filter(([k, v])=> k !== 'LEFT');
-        if((circleA.position + 1) % 10 == 0)
-            adjacentSquaresEntries = adjacentSquaresEntries.filter(([k, v])=> k !== 'RIGHT');
-        if(circleA.position >= 0 && circleA.position <= 9)
-            adjacentSquaresEntries = adjacentSquaresEntries.filter(([k, v])=> k !== 'UP');
-        if(circleA.position >= 90 && circleA.position <= 99)
-            adjacentSquaresEntries = adjacentSquaresEntries.filter(([k, v])=> k !== 'DOWN');
-
-        for(let [direction, func] of adjacentSquaresEntries) {
-            if(func(circleA) === circleB.position)
-                return true;
-        }
-        return false;
+    function getSelectedCircle() {
+        return circles.find(circle => circle.selected);
     }
 
-    function match(circle) {
-        return true;
-    }
-
-    //if nothing is selected
     if(nothingIsSelected()) {
-        circle.div.classList.add('selected');
+        circle.select();
+    //if neighbor is not clicked
+    } else if(isNeighbor(circle, getSelectedCircle())) {
+        console.log('neighbors');
     } else {
-        const selected = circles.find(c => c.div.classList.contains('selected'));
-
-        //if selected is not neighbor
-        if(!isNeighbor(circle, selected)) {
-            deselect();
-            circle.div.classList.add('selected');
-        //if selected is neighbor
-        } else {
-            swap(circle, selected);
-            if(match(circle)) {
-                console.log('do cascade');
-                let points = cascade();
-                score(points);
-            } else {
-                swap(circle, selected);
-                console.log('swap back');
-            }
-            deselect();
-        }
+        deselect();
+        circle.select();
     }
 }
 
-function score(points) {
-    totalScore += points;
-    totalScoreSpan.innerHTML = totalScore;
-    currentScore += points;
-    let percent = (currentScore / levelScore) * 100
-    progress.style.width = `${percent}%`;
-    if(percent >= 100) {
-        console.log('levelTransition()');
-        progress.style.width = '0%';
-        currentScore = 0;
-        currentLevel += 1;
-        levelScore = calculateLevelScore(currentLevel);
-    }
-}
-
-let totalScore = 0;
-let currentScore = 0;
-let currentLevel = 1;
-let levelScore = calculateLevelScore(currentLevel);
-
-function calculateLevelScore(level) {
-    return 100 * level;
-}
-
-populate();
+populateCircles();
