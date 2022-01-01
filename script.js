@@ -6,6 +6,8 @@ const colors = ['red', 'green', 'blue', 'purple', 'yellow'];
 
 const circles = [];
 
+let ANIMATION_RUNNING = false;
+
 class Circle {
     #div;
 
@@ -26,6 +28,11 @@ class Circle {
             top: parseFloat(this.#div.style.top),
             left: parseFloat(this.#div.style.left)
         }
+    }
+
+    setPosition(top, left) {
+        this.#div.style.top = `${top}px`;
+        this.#div.style.left = `${left}px`;
     }
 
     get selected() {
@@ -60,6 +67,8 @@ function populateCircles() {
 }
 
 function select(circle) {
+    if(ANIMATION_RUNNING) return;
+
     function deselect() {
         circles.forEach(circle => circle.deselect());
     }
@@ -78,10 +87,27 @@ function select(circle) {
         return circles.find(circle => circle.selected);
     }
 
+    function swap(circleA, circleB) {
+        const targetA = Object.assign({}, circleA.position);
+        const targetB = Object.assign({}, circleB.position);
+        console.log(targetA, targetB);
+        let top = circleA.position.top;
+        const movementHandle = setInterval(()=> {
+            if(circleA.position.top !== targetB.top) {
+                ANIMATION_RUNNING = true;
+                circleA.setPosition(top++, circleA.position.left);
+            } else {
+                ANIMATION_RUNNING = false;
+                clearInterval(movementHandle);
+            }
+        }, 200);
+    }
+
     if(nothingIsSelected()) {
         circle.select();
     //if neighbor is not clicked
     } else if(isNeighbor(circle, getSelectedCircle())) {
+        swap(circle, getSelectedCircle());
         console.log('neighbors');
     } else {
         deselect();
