@@ -88,19 +88,40 @@ function select(circle) {
     }
 
     function swap(circleA, circleB) {
+        function move(direction, value, circle, target) {
+            console.log(direction, value, circle, target);
+            const movementHandle = setInterval(()=> {
+                const magnitude = 1 * (value < 0 ? 1 : -1);
+                const constantPosition = direction === 'left' ? 'top' : 'left';
+                let position = circle.position[direction];
+                if(circle.position[direction] !== target[direction]) {
+                    ANIMATION_RUNNING = true;
+                    if(direction === 'top')
+                        circle.setPosition(position += magnitude, circle.position[constantPosition]);
+                    else
+                        circle.setPosition(circle.position[constantPosition], position += magnitude);
+                } else {
+                    ANIMATION_RUNNING = false;
+                    clearInterval(movementHandle);
+                }
+            }, 100);
+        }
+
         const targetA = Object.assign({}, circleA.position);
         const targetB = Object.assign({}, circleB.position);
-        console.log(targetA, targetB);
-        let top = circleA.position.top;
-        const movementHandle = setInterval(()=> {
-            if(circleA.position.top !== targetB.top) {
-                ANIMATION_RUNNING = true;
-                circleA.setPosition(top++, circleA.position.left);
-            } else {
-                ANIMATION_RUNNING = false;
-                clearInterval(movementHandle);
-            }
-        }, 200);
+        const horiz = circleA.position.left - circleB.position.left;
+        const vert = circleA.position.top - circleB.position.top;
+
+        console.log(horiz, vert);
+
+        let direction = horiz !== 0 ? 'left' : 'top';
+        let value = horiz !== 0 ? horiz : vert;
+
+        move(direction, value, circleA, targetB);
+
+        direction = direction === 'top' ? 'left' : 'top';
+
+        move(direction, -value, circleB, targetA);
     }
 
     if(nothingIsSelected()) {
